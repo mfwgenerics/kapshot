@@ -1,5 +1,5 @@
 pluginManagement {
-    includeBuild("plugin-gradle")
+    includeBuild("kapshot-plugin-gradle")
 }
 
 includeBuild("kapshot-runtime")

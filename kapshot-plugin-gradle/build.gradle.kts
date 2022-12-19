@@ -3,8 +3,16 @@ repositories {
 }
 
 plugins {
+    id("conventions")
+
     id("java-gradle-plugin")
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.7.21"
+
+    id("com.github.gmazzo.buildconfig") version "3.1.0"
+}
+
+buildConfig {
+    buildConfigField("String", "VERSION", "\"${project.version}\"")
 }
 
 dependencies {

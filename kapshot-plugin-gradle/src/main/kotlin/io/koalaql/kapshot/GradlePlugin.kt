@@ -1,5 +1,6 @@
 package io.koalaql.kapshot
 
+import io.koalaql.kapshot_plugin_gradle.BuildConfig
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -15,13 +16,13 @@ class GradlePlugin : KotlinCompilerPluginSupportPlugin {
     override fun getPluginArtifact(): SubpluginArtifact = SubpluginArtifact(
         groupId = "io.koalaql",
         artifactId = "kapshot-plugin-kotlin",
-        version = "0.0.1"
+        version = BuildConfig.VERSION
     )
 
     override fun apply(target: Project) {
         /* make sure we don't try to add dependency until it has been configured by kotlin plugin */
         target.plugins.withId("org.jetbrains.kotlin.jvm") {
-            target.dependencies.add("implementation", "io.koalaql:kapshot-runtime:0.0.1")
+            target.dependencies.add("implementation", "io.koalaql:kapshot-runtime:${BuildConfig.VERSION}")
         }
     }
 

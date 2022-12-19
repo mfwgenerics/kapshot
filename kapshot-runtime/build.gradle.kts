@@ -3,13 +3,12 @@ repositories {
 }
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    id("conventions")
+
+    kotlin("jvm") version "1.7.21"
 
     `maven-publish`
 }
-
-group = "io.koalaql"
-version = "0.0.1"
 
 publishing {
     publications {
