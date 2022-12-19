@@ -3,17 +3,7 @@ repositories {
 }
 
 plugins {
-    id("conventions")
+    id("publish")
 
     kotlin("jvm") version "1.7.21"
-
-    `maven-publish`
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("default") {
-            from(components["java"])
-        }
-    }
 }
