@@ -1,9 +1,5 @@
 name: Publish plugins and dependencies
-on:
-  release:
-    types: [push]
-    branches:
-      - main
+on: push
 jobs:
   staging_repository:
     runs-on: ubuntu-latest
