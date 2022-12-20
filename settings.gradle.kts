@@ -4,4 +4,6 @@ pluginManagement {
 
 includeBuild("kapshot-runtime")
 includeBuild("kapshot-plugin-kotlin")
+
 include("testing")
+include("readme")
