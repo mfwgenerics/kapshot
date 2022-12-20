@@ -33,7 +33,9 @@ You can invoke the block similar to a regular function:
 import io.koalaql.kapshot.CapturedBlock
 
 fun equation(block: CapturedBlock<Int>): String {
-    return "${block.source()} = ${block()}"
+    val result = block() // invoke the block
+    
+    return "${block.source()} = $result"
 }
 
 check(equation { 2 + 2 } == "2 + 2 = 4")
@@ -42,4 +44,9 @@ check(equation { 2 + 2 } == "2 + 2 = 4")
 ## Purpose
 
 The purpose of this plugin is to support experimental literate
-programming and documentation generation techniques using the Kotlin language.
+programming and documentation generation techniques in Kotlin.
+
+An example of this is the code used to generate this README.md.
+The sample code is executed during generation to ensure correctness.
+
+View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)
