@@ -69,7 +69,8 @@ The purpose of this plugin is to support experimental literate
 programming and documentation generation techniques in Kotlin.
 
 An example of this is the code used to generate this README.md.
-The sample code is executed during generation to ensure correctness.
+Capturing source from blocks allows sample code to be run and
+tested during generation.
 
 View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)
     """.trim())
