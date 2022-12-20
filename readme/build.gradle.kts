@@ -13,3 +13,11 @@ repositories {
 application {
     mainClass.set("MainKt")
 }
+
+dependencies {
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
+}

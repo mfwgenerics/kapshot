@@ -7,11 +7,11 @@ fun execSource(block: CapturedBlock<*>): String {
     return block.source()
 }
 
-fun main() {
+fun generateMarkdown(): String {
     val blockClass = CapturedBlock::class
     val importStatement = "import ${blockClass.qualifiedName}"
 
-    Path("../README.md").writeText("""
+    return """
 # Kapshot
 Kapshot is a simple Kotlin compiler plugin for capturing source code text from closures.
 
@@ -39,7 +39,7 @@ ${
         val captured = CapturedBlock {
             println("Hello!")
         }
-            
+
         check(captured.source() == """println("Hello!")""")
     }
 }
@@ -54,10 +54,10 @@ ${
     execSource {
         fun equation(block: CapturedBlock<Int>): String {
             val result = block() // invoke the block
-            
+
             return "${block.source()} = $result"
         }
-        
+
         check(equation { 2 + 2 } == "2 + 2 = 4")
     }
 }
@@ -73,5 +73,9 @@ Capturing source from blocks allows sample code to be run and
 tested during generation.
 
 View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)
-    """.trim())
+    """.trim()
+}
+
+fun main() {
+    Path("../README.md").writeText(generateMarkdown())
 }
