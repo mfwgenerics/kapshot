@@ -38,8 +38,14 @@ class CaptureTransformer(
             var startOffset = sourceElement.startOffset
             var endOffset = sourceElement.endOffset
 
-            while (endOffset > startOffset && fileText[endOffset] != '}') endOffset--
-            while (startOffset < endOffset && fileText[startOffset - 1] != '{') startOffset++
+            while (endOffset > startOffset && fileText[endOffset - 1] != '}') endOffset--
+            while (startOffset < endOffset && fileText[startOffset] != '{') startOffset++
+
+            if (endOffset > startOffset + 1) {
+                /* assume {...} and trim */
+                endOffset--
+                startOffset++
+            }
 
             val trimmed = fileText.substring(startOffset, endOffset).trimIndent().trim()
 

@@ -57,6 +57,11 @@ i""",
         )
     }
 
+    /*
+    Emojis here are used to test against possible source offset issues introduced by non-BMP Unicode
+    🎅 🎅 🎅
+    */
+
     @Test
     fun `capture nesting`() {
         expectCapture("""
@@ -68,5 +73,14 @@ i""",
                 2 + 2
             }
         }
+    }
+
+    @Test
+    fun `embedded string literal test`() {
+        fun <T : Any> sourceOf(block: CapturedBlock<T>): String = block.source()
+
+        assertEquals("""🎅|${sourceOf {
+            2 + 2
+        }}|""", "\uD83C\uDF85|2 + 2|")
     }
 }
