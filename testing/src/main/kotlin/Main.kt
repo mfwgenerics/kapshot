@@ -1,13 +1,17 @@
+import io.koalaql.kapshot.Capturable
+
 fun interface CapturedTest0<R> {
     operator fun invoke(): R
 
     fun source(): String = error("there is no source code for this block")
 }
 
-fun interface CapturedTest1<T, R> {
+fun interface CapturedTest1<T, R>: Capturable<CapturedTest1<T, R>> {
     operator fun invoke(arg: T): R
 
-    fun source(): String = error("there is no source code for this block")
+    override fun withSource(source: String): CapturedTest1<T, R> = object : CapturedTest1<T, R> by this {
+        override fun source(): String = source
+    }
 }
 
 fun interface CapturedTestC0<C, R> {

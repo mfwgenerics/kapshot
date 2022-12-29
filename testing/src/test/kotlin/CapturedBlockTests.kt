@@ -83,4 +83,16 @@ i""",
             2 + 2
         }}|""", "\uD83C\uDF85|2 + 2|")
     }
+
+    @Test
+    fun `user defined unary capture block`() {
+        fun List<Int>.sourceyMap(block: CapturedTest1<Int, Int>): String {
+            return "$this.map { ${block.source()} } = ${map { block(it) }}"
+        }
+
+        assertEquals(
+            "[1, 2, 3].map { it*2 } = [2, 4, 6]",
+            listOf(1, 2, 3).sourceyMap { it*2 }
+        )
+    }
 }
