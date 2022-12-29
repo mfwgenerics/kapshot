@@ -5,8 +5,8 @@ repositories {
 plugins {
     id("publish")
 
-    kotlin("jvm") version "1.7.21"
-    kotlin("kapt") version "1.7.21"
+    kotlin("jvm") version "1.8.0"
+    kotlin("kapt") version "1.8.0"
 }
 
 dependencies {
