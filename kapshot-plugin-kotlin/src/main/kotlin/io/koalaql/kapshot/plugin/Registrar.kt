@@ -2,18 +2,16 @@ package io.koalaql.kapshot.plugin
 
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
-import org.jetbrains.kotlin.com.intellij.mock.MockProject
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 
-@AutoService(ComponentRegistrar::class)
+@AutoService(CompilerPluginRegistrar::class)
 @OptIn(ExperimentalCompilerApi::class)
-class Registrar: ComponentRegistrar {
-    override fun registerProjectComponents(
-        project: MockProject,
-        configuration: CompilerConfiguration
-    ) {
-        IrGenerationExtension.registerExtension(project, GenerationExtension())
+class Registrar: CompilerPluginRegistrar() {
+    override val supportsK2: Boolean get() = false
+
+    override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
+        IrGenerationExtension.registerExtension(GenerationExtension())
     }
 }
