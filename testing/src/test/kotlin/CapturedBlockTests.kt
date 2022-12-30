@@ -1,3 +1,4 @@
+import io.koalaql.kapshot.Capturable
 import io.koalaql.kapshot.CapturedBlock
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -82,6 +83,14 @@ i""",
         assertEquals("""🎅|${sourceOf {
             2 + 2
         }}|""", "\uD83C\uDF85|2 + 2|")
+    }
+
+    fun interface CapturedTest1<T, R>: Capturable<CapturedTest1<T, R>> {
+        operator fun invoke(arg: T): R
+
+        override fun withSource(source: String): CapturedTest1<T, R> = object : CapturedTest1<T, R> by this {
+            override fun source(): String = source
+        }
     }
 
     @Test

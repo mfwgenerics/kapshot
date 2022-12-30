@@ -20,8 +20,6 @@ class GenerationExtension(
             ))
             .first()
 
-        moduleFragment.accept(DebugVisitor(messages), Unit)
-
         moduleFragment.transform(
             CaptureTransformer(
                 pluginContext,
