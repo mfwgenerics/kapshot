@@ -13,13 +13,15 @@ import org.jetbrains.kotlin.ir.expressions.IrTypeOperator
 import org.jetbrains.kotlin.ir.expressions.IrTypeOperatorCall
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.types.IrSimpleType
+import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.util.dumpKotlinLike
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import java.io.File
 
 class CaptureTransformer(
     private val context: IrPluginContext,
     private val addSourceToBlock: IrSimpleFunctionSymbol,
-    private val captureBlockFqn: String = "io.koalaql.kapshot.CapturedBlock"
+    private val capturableFqn: String = "io.koalaql.kapshot.Capturable"
 ): IrElementTransformerVoidWithContext() {
     private fun transformSam(expression: IrTypeOperatorCall): IrExpression {
         val symbol = currentScope!!.scope.scopeOwnerSymbol
@@ -49,7 +51,7 @@ class CaptureTransformer(
 
             val trimmed = fileText.substring(startOffset, endOffset).trimIndent().trim()
 
-            addSourceCall.putTypeArgument(0, context.irBuiltIns.stringType)
+            addSourceCall.putTypeArgument(0, expression.type)
 
             /* super call here rather than directly using expression is required to support nesting. otherwise we don't transform the subtree */
             addSourceCall.putValueArgument(0, super.visitTypeOperator(expression))
@@ -59,12 +61,21 @@ class CaptureTransformer(
         }
     }
 
+    private fun typeIsFqn(type: IrType, fqn: String): Boolean {
+        if (type !is IrSimpleType) return false
+
+        return when (val owner = type.classifier.owner) {
+            is IrClass -> owner.kotlinFqName.asString() == fqn
+            else -> false
+        }
+    }
+
     override fun visitTypeOperator(expression: IrTypeOperatorCall): IrExpression {
         if (expression.operator == IrTypeOperator.SAM_CONVERSION) {
             when (val type = expression.type) {
                 is IrSimpleType -> {
                     when (val owner = type.classifier.owner) {
-                        is IrClass -> if (owner.kotlinFqName.asString() == captureBlockFqn) {
+                        is IrClass -> if (owner.superTypes.any { typeIsFqn(it, capturableFqn) }) {
                             return transformSam(expression)
                         }
                     }

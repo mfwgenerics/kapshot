@@ -51,3 +51,41 @@ Capturing source from blocks allows sample code to be run and
 tested during generation.
 
 View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)
+
+## Parameterized Blocks
+
+The default `CapturedBlock` interface doesn't accept any
+arguments to `invoke` and is only generic on the return type. This
+means the captured source block must depend only on state from the
+enclosing scope. To write source capturing versions of builder blocks
+or common higher-order functions like `map` and `filter` you will
+need to define your own capture interface that extends `Capturable`.
+
+
+```kotlin
+/* must be a fun interface to support SAM conversion from blocks */
+fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
+    /* invoke is not special. this could be any single abstract method */
+    operator fun invoke(arg: T): R
+
+    /* withSource is called by the plugin to add source information */
+    override fun withSource(source: String): CustomCapturable<T, R> =
+        object : CustomCapturable<T, R> by this { override fun source(): String = source }
+}
+```
+
+Once you have declared your own `Capturable` you can use it
+in a similar way to `CapturedBlock` from above.
+
+```kotlin
+fun <T> List<T>.mapped(block: CustomCapturable<T, T>): String {
+    return "$this.map { ${block.source()} } = ${map { block(it) }}"
+}
+
+check(
+    listOf(1, 2, 3).mapped { x -> x*2 } ==
+    "[1, 2, 3].map { x -> x*2 } = [2, 4, 6]"
+)
+```
+
+If it is present, the block's argument list is considered part of its source text.
