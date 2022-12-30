@@ -8,8 +8,6 @@ fun execSource(block: CapturedBlock<*>): String {
     return block.source()
 }
 
-fun <C : Capturable<C>> sourceOf(capturable: C): String = capturable.source()
-
 fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
     operator fun invoke(arg: T): R
 
