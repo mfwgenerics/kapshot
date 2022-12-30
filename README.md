@@ -52,7 +52,7 @@ tested during generation.
 
 View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)
 
-## Parameterized Capture Blocks
+## Parameterized Blocks
 
 The default `CapturedBlock` interface doesn't accept any
 arguments to `invoke` and is only generic on the return type. This
