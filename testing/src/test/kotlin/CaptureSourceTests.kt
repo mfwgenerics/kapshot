@@ -46,9 +46,18 @@ class CaptureSourceTests {
     private val capMethodSourceSource = """
     @Test
     fun `capture method source`() {
+        class Inner {
+            @CaptureSource
+            fun five() = 5
+        }
+
         assertEquals(
             capMethodSourceSource,
             sourceOf(::`capture method source`)
+        )
+
+        assertEquals(
+            "fun five() = 5", sourceOf(Inner::five)
         )
     }
     """.trimIndent()
@@ -56,9 +65,18 @@ class CaptureSourceTests {
     @CaptureSource
     @Test
     fun `capture method source`() {
+        class Inner {
+            @CaptureSource
+            fun five() = 5
+        }
+
         assertEquals(
             capMethodSourceSource,
             sourceOf(::`capture method source`)
+        )
+
+        assertEquals(
+            "fun five() = 5", sourceOf(Inner::five)
         )
     }
 }
