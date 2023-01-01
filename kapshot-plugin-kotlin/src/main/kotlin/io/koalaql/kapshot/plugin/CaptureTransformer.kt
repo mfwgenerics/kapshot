@@ -11,6 +11,8 @@ import org.jetbrains.kotlin.ir.builders.IrSingleStatementBuilder
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationBase
+import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.path
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrTypeOperator
@@ -98,7 +100,7 @@ class CaptureTransformer(
         return super.visitTypeOperator(expression)
     }
 
-    override fun visitClassNew(declaration: IrClass): IrStatement {
+    override fun visitDeclaration(declaration: IrDeclarationBase): IrStatement {
         val captureSource = declaration.annotations.singleOrNull {
             typeIsFqn(it.type, captureSourceFqn)
         }
@@ -117,6 +119,6 @@ class CaptureTransformer(
             )
         }
 
-        return super.visitClassNew(declaration)
+        return super.visitDeclaration(declaration)
     }
 }
