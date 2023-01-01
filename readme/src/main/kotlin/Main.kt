@@ -1,5 +1,7 @@
 import io.koalaql.kapshot.Capturable
+import io.koalaql.kapshot.CaptureSource
 import io.koalaql.kapshot.CapturedBlock
+import io.koalaql.kapshot.sourceOf
 import kotlin.io.path.Path
 import kotlin.io.path.writeText
 
@@ -8,9 +10,13 @@ fun execSource(block: CapturedBlock<*>): String {
     return block.source()
 }
 
+@CaptureSource
+/* must be a fun interface to support SAM conversion from blocks */
 fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
+    /* invoke is not special. this could be any single abstract method */
     operator fun invoke(arg: T): R
 
+    /* withSource is called by the plugin to add source information */
     override fun withSource(source: String): CustomCapturable<T, R> =
         object : CustomCapturable<T, R> by this { override fun source(): String = source }
 }
@@ -92,21 +98,8 @@ enclosing scope. To write source capturing versions of builder blocks
 or common higher-order functions like `map` and `filter` you will
 need to define your own capture interface that extends `${capturableClass.simpleName}`.
 
-${""/*
-The code below can't be captured from a block due to limitations on where
-interfaces can be declared. Perhaps a future version of this plugin could
-add a sourceOf<T>() operator for class/interface definitions
-*/}
 ```kotlin
-/* must be a fun interface to support SAM conversion from blocks */
-fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
-    /* invoke is not special. this could be any single abstract method */
-    operator fun invoke(arg: T): R
-
-    /* withSource is called by the plugin to add source information */
-    override fun withSource(source: String): CustomCapturable<T, R> =
-        object : CustomCapturable<T, R> by this { override fun source(): String = source }
-}
+${sourceOf<CustomCapturable<*, *>>()}
 ```
 
 Once you have declared your own `${capturableClass.simpleName}` you can use it

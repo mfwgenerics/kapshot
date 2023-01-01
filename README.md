@@ -61,7 +61,6 @@ enclosing scope. To write source capturing versions of builder blocks
 or common higher-order functions like `map` and `filter` you will
 need to define your own capture interface that extends `Capturable`.
 
-
 ```kotlin
 /* must be a fun interface to support SAM conversion from blocks */
 fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
