@@ -24,11 +24,13 @@ fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
 fun generateMarkdown(): String {
     val capturableClass = Capturable::class
     val blockClass = CapturedBlock::class
+    val captureAnno = CaptureSource::class
+
     val importStatement = "import ${blockClass.qualifiedName}"
 
     return """
 # Kapshot
-Kapshot is a simple Kotlin compiler plugin for capturing source code text from closures.
+Kapshot is a simple Kotlin compiler plugin for capturing source code text from closure blocks and declarations.
 
 ## Usage
 
@@ -41,6 +43,8 @@ plugins {
     id("io.koalaql.kapshot-plugin") version "0.0.2"
 }
 ```
+
+### Capturing Blocks
 
 Now your Kotlin code can use `${blockClass.simpleName}<T>` as a source enriched replacement for `() -> T`.
 You can call `${CapturedBlock<*>::source.name}()` on any instance of
@@ -78,18 +82,7 @@ ${
 }
 ```
 
-## Purpose
-
-The purpose of this plugin is to support experimental literate
-programming and documentation generation techniques in Kotlin.
-
-An example of this is the code used to generate this README.md.
-Capturing source from blocks allows sample code to be run and
-tested during generation.
-
-View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)
-
-## Parameterized Blocks
+### Parameterized Blocks
 
 The default `${blockClass.simpleName}` interface doesn't accept any
 arguments to `invoke` and is only generic on the return type. This
@@ -120,7 +113,54 @@ ${
 }
 ```
 
-If it is present, the block's argument list is considered part of its source text. 
+If it is present, the block's argument list is considered part of its source text.
+ 
+### Declarations
+
+You can capture declaration sources using the `@${captureAnno.simpleName}`
+annotation. The source of annotated declarations can then be retrieved using
+`sourceOf<T>` for class declarations or `sourceOf(::method)` for method
+declarations. The source capture starts at the end of the `@${captureAnno.simpleName}`
+annotation.
+
+```kotlin
+${
+    execSource {
+        @CaptureSource
+        class MyClass {
+            @CaptureSource
+            fun twelve() = 12
+        }
+        
+        check(
+            sourceOf<MyClass>() ==
+            """
+            class MyClass {
+                @CaptureSource
+                fun twelve() = 12
+            }
+            """.trimIndent()
+        )
+        
+        check(
+            sourceOf(MyClass::twelve) ==
+            "fun twelve() = 12"
+        )
+    }
+}
+```
+
+## Purpose
+
+The purpose of this plugin is to support experimental literate
+programming and documentation generation techniques in Kotlin.
+
+An example of this is the code used to generate this README.md.
+Capturing source from blocks allows sample code to be run and
+tested during generation.
+
+View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)
+
     """.trim()
 }
 
