@@ -1,5 +1,5 @@
 # Kapshot
-Kapshot is a simple Kotlin compiler plugin for capturing source code text from closures.
+Kapshot is a simple Kotlin compiler plugin for capturing source code text from closure blocks and declarations.
 
 ## Usage
 
@@ -12,6 +12,8 @@ plugins {
     id("io.koalaql.kapshot-plugin") version "0.0.2"
 }
 ```
+
+### Capturing Blocks
 
 Now your Kotlin code can use `CapturedBlock<T>` as a source enriched replacement for `() -> T`.
 You can call `source()` on any instance of
@@ -41,18 +43,7 @@ fun equation(block: CapturedBlock<Int>): String {
 check(equation { 2 + 2 } == "2 + 2 = 4")
 ```
 
-## Purpose
-
-The purpose of this plugin is to support experimental literate
-programming and documentation generation techniques in Kotlin.
-
-An example of this is the code used to generate this README.md.
-Capturing source from blocks allows sample code to be run and
-tested during generation.
-
-View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)
-
-## Parameterized Blocks
+### Parameterized Blocks
 
 The default `CapturedBlock` interface doesn't accept any
 arguments to `invoke` and is only generic on the return type. This
@@ -60,7 +51,6 @@ means the captured source block must depend only on state from the
 enclosing scope. To write source capturing versions of builder blocks
 or common higher-order functions like `map` and `filter` you will
 need to define your own capture interface that extends `Capturable`.
-
 
 ```kotlin
 /* must be a fun interface to support SAM conversion from blocks */
@@ -89,3 +79,45 @@ check(
 ```
 
 If it is present, the block's argument list is considered part of its source text.
+ 
+### Declarations
+
+You can capture declaration sources using the `@CaptureSource`
+annotation. The source of annotated declarations can then be retrieved using
+`sourceOf<T>` for class declarations or `sourceOf(::method)` for method
+declarations. The source capture starts at the end of the `@CaptureSource`
+annotation.
+
+```kotlin
+@CaptureSource
+class MyClass {
+    @CaptureSource
+    fun twelve() = 12
+}
+
+check(
+    sourceOf<MyClass>() ==
+    """
+    class MyClass {
+        @CaptureSource
+        fun twelve() = 12
+    }
+    """.trimIndent()
+)
+
+check(
+    sourceOf(MyClass::twelve) ==
+    "fun twelve() = 12"
+)
+```
+
+## Purpose
+
+The purpose of this plugin is to support experimental literate
+programming and documentation generation techniques in Kotlin.
+
+An example of this is the code used to generate this README.md.
+Capturing source from blocks allows sample code to be run and
+tested during generation.
+
+View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)

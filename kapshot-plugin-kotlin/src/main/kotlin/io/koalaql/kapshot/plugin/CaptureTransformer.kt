@@ -4,25 +4,40 @@ import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.sourceElement
+import org.jetbrains.kotlin.backend.jvm.ir.getStringConstArgument
+import org.jetbrains.kotlin.ir.IrElement
+import org.jetbrains.kotlin.ir.IrStatement
+import org.jetbrains.kotlin.ir.builders.IrSingleStatementBuilder
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationBase
+import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.path
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrTypeOperator
 import org.jetbrains.kotlin.ir.expressions.IrTypeOperatorCall
+import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.util.dump
 import org.jetbrains.kotlin.ir.util.dumpKotlinLike
 import org.jetbrains.kotlin.ir.util.kotlinFqName
+import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import java.io.File
 
 class CaptureTransformer(
     private val context: IrPluginContext,
     private val addSourceToBlock: IrSimpleFunctionSymbol,
-    private val capturableFqn: String = "io.koalaql.kapshot.Capturable"
+    private val capturableFqn: String = "io.koalaql.kapshot.Capturable",
+    private val captureSourceFqn: String = "io.koalaql.kapshot.CaptureSource",
 ): IrElementTransformerVoidWithContext() {
+    fun currentFileText(): String {
+        /* https://youtrack.jetbrains.com/issue/KT-41888 */
+        return File(currentFile.path).readText().replace("\r\n", "\n")
+    }
+
     private fun transformSam(expression: IrTypeOperatorCall): IrExpression {
         val symbol = currentScope!!.scope.scopeOwnerSymbol
 
@@ -34,8 +49,7 @@ class CaptureTransformer(
                 expression.typeOperand
             )
 
-            /* https://youtrack.jetbrains.com/issue/KT-41888 */
-            val fileText = File(currentFile.path).readText().replace("\r\n", "\n")
+            val fileText = currentFileText()
 
             var startOffset = sourceElement.startOffset
             var endOffset = sourceElement.endOffset
@@ -84,5 +98,27 @@ class CaptureTransformer(
         }
 
         return super.visitTypeOperator(expression)
+    }
+
+    override fun visitDeclaration(declaration: IrDeclarationBase): IrStatement {
+        val captureSource = declaration.annotations.singleOrNull {
+            typeIsFqn(it.type, captureSourceFqn)
+        }
+
+        if (captureSource != null) {
+            val fileText = currentFileText()
+
+            /* we start from end of captureSource rather than declaration.startOffset to exclude the capture annotation */
+            val startOffset = captureSource.endOffset
+            val endOffset = declaration.endOffset
+
+            val trimmed = fileText.substring(startOffset, endOffset).trimIndent().trim()
+
+            captureSource.putValueArgument(0,
+                IrConstImpl.string(captureSource.startOffset, captureSource.endOffset, context.irBuiltIns.stringType, trimmed)
+            )
+        }
+
+        return super.visitDeclaration(declaration)
     }
 }
