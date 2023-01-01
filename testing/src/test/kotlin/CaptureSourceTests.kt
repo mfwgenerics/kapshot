@@ -7,6 +7,11 @@ class CaptureSourceTests {
     @CaptureSource
     interface TestClass {
         fun boo() = "boo!"
+
+        @CaptureSource
+        class Nested {
+            val test get() = "nest"
+        }
     }
 
     @Test
@@ -15,9 +20,26 @@ class CaptureSourceTests {
             """
             interface TestClass {
                 fun boo() = "boo!"
+        
+                @CaptureSource
+                class Nested {
+                    val test get() = "nest"
+                }
             }
             """.trimIndent(),
             sourceOf<TestClass>()
+        )
+    }
+
+    @Test
+    fun `capture nested class source`() {
+        assertEquals(
+            """
+            class Nested {
+                val test get() = "nest"
+            }
+            """.trimIndent(),
+            sourceOf<TestClass.Nested>()
         )
     }
 
