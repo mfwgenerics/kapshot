@@ -79,4 +79,64 @@ class CaptureSourceTests {
             "fun five() = 5", sourceOf(Inner::five)
         )
     }
+
+    @CaptureSource
+    interface CapturedInterface {
+        fun type() = "interface"
+    }
+
+    @CaptureSource
+    object CapturedObj {
+        val test = "123"
+    }
+
+    @CaptureSource
+    sealed class CapturedSealed {
+        object Left: CapturedSealed()
+        object Right: CapturedSealed()
+
+        @CaptureSource
+        companion object { }
+    }
+
+    @Test
+    fun `capture assorted declarations`() {
+        assertEquals(
+            """
+            interface CapturedInterface {
+                fun type() = "interface"
+            }
+            """.trimIndent(),
+            sourceOf<CapturedInterface>()
+        )
+
+        assertEquals(
+            """
+            object CapturedObj {
+                val test = "123"
+            }
+            """.trimIndent(),
+            sourceOf<CapturedObj>()
+        )
+
+        assertEquals(
+            """
+            sealed class CapturedSealed {
+                object Left: CapturedSealed()
+                object Right: CapturedSealed()
+
+                @CaptureSource
+                companion object { }
+            }
+            """.trimIndent(),
+            sourceOf<CapturedSealed>()
+        )
+
+        assertEquals(
+            """
+                companion object { }
+            """.trimIndent(),
+            sourceOf<CapturedSealed.Companion>()
+        )
+    }
 }
