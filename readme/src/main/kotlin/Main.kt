@@ -40,7 +40,7 @@ Include the `io.koalaql.kapshot-plugin` Gradle plugin in your `build.gradle.kts`
 plugins {
     /* ... */
 
-    id("io.koalaql.kapshot-plugin") version "0.0.2"
+    id("io.koalaql.kapshot-plugin") version "0.0.3"
 }
 ```
 
