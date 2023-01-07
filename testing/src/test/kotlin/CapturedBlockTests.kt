@@ -1,6 +1,9 @@
 import io.koalaql.kapshot.Capturable
 import io.koalaql.kapshot.CapturedBlock
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.test.assertEquals
 
 class CapturedBlockTests {
@@ -103,5 +106,24 @@ i""",
             "[1, 2, 3].map { it*2 } = [2, 4, 6]",
             listOf(1, 2, 3).sourceyMap { it*2 }
         )
+    }
+
+    fun interface SuspendTest<R>: Capturable<SuspendTest<R>> {
+        suspend operator fun invoke(): R
+
+        override fun withSource(source: String): SuspendTest<R> = object : SuspendTest<R> by this {
+            override fun source(): String = source
+        }
+    }
+
+    @Test
+    fun `user defined suspend capture`() {
+        suspend fun suspends(block: SuspendTest<Int>): String = "${block.source()}=${10 + block()})"
+
+        runBlocking {
+            assertEquals("suspendCoroutine { it.resume(32) }=42)", suspends {
+                suspendCoroutine { it.resume(32) }
+            })
+        }
     }
 }
