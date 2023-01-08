@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.ir.util.dumpKotlinLike
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import java.io.File
+import kotlin.io.path.Path
 
 class CaptureTransformer(
     private val context: IrPluginContext,
@@ -36,6 +37,18 @@ class CaptureTransformer(
     fun currentFileText(): String {
         /* https://youtrack.jetbrains.com/issue/KT-41888 */
         return File(currentFile.path).readText().replace("\r\n", "\n")
+    }
+
+    private fun encodeSourceLocation(
+        start: Int,
+        end: Int
+    ): String {
+        val entry = currentFile.fileEntry
+
+        fun encodeOffset(offset: Int): String =
+            "$offset,${entry.getLineNumber(offset)},${entry.getColumnNumber(offset)}"
+
+        return "\n${encodeOffset(start)}\n${encodeOffset(end)}"
     }
 
     private fun transformSam(expression: IrTypeOperatorCall): IrExpression {
@@ -69,7 +82,8 @@ class CaptureTransformer(
 
             /* super call here rather than directly using expression is required to support nesting. otherwise we don't transform the subtree */
             addSourceCall.putValueArgument(0, super.visitTypeOperator(expression))
-            addSourceCall.putValueArgument(1, irString(trimmed))
+            addSourceCall.putValueArgument(1, irString(encodeSourceLocation(startOffset, endOffset)))
+            addSourceCall.putValueArgument(2, irString(trimmed))
 
             addSourceCall
         }

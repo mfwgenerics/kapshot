@@ -1,13 +1,10 @@
-import io.koalaql.kapshot.Capturable
-import io.koalaql.kapshot.CaptureSource
-import io.koalaql.kapshot.CapturedBlock
-import io.koalaql.kapshot.sourceOf
+import io.koalaql.kapshot.*
 import kotlin.io.path.Path
 import kotlin.io.path.writeText
 
 fun execSource(block: CapturedBlock<*>): String {
     block()
-    return block.source()
+    return block.source().text
 }
 
 @CaptureSource
@@ -17,8 +14,8 @@ fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
     operator fun invoke(arg: T): R
 
     /* withSource is called by the plugin to add source information */
-    override fun withSource(source: String): CustomCapturable<T, R> =
-        object : CustomCapturable<T, R> by this { override fun source(): String = source }
+    override fun withSource(source: Source): CustomCapturable<T, R> =
+        object : CustomCapturable<T, R> by this { override fun source(): Source = source }
 }
 
 fun generateMarkdown(): String {
@@ -59,7 +56,7 @@ ${
             println("Hello!")
         }
 
-        check(captured.source() == """println("Hello!")""")
+        check(captured.source().text == """println("Hello!")""")
     }
 }
 ```

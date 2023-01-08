@@ -1,5 +1,6 @@
 import io.koalaql.kapshot.Capturable
 import io.koalaql.kapshot.CapturedBlock
+import io.koalaql.kapshot.Source
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.coroutines.resume
@@ -13,7 +14,7 @@ class CapturedBlockTests {
         block: CapturedBlock<T>
     ) {
         assertEquals(result, block())
-        assertEquals(source, block.source())
+        assertEquals(source, block.source().text)
     }
 
     @Test
@@ -81,7 +82,7 @@ i""",
 
     @Test
     fun `embedded string literal test`() {
-        fun <T : Any> sourceOf(block: CapturedBlock<T>): String = block.source()
+        fun <T : Any> sourceOf(block: CapturedBlock<T>): String = block.source().text
 
         assertEquals("""🎅|${sourceOf {
             2 + 2
@@ -91,8 +92,8 @@ i""",
     fun interface CapturedTest1<T, R>: Capturable<CapturedTest1<T, R>> {
         operator fun invoke(arg: T): R
 
-        override fun withSource(source: String): CapturedTest1<T, R> = object : CapturedTest1<T, R> by this {
-            override fun source(): String = source
+        override fun withSource(source: Source): CapturedTest1<T, R> = object : CapturedTest1<T, R> by this {
+            override fun source(): Source = source
         }
     }
 
@@ -111,8 +112,8 @@ i""",
     fun interface SuspendTest<R>: Capturable<SuspendTest<R>> {
         suspend operator fun invoke(): R
 
-        override fun withSource(source: String): SuspendTest<R> = object : SuspendTest<R> by this {
-            override fun source(): String = source
+        override fun withSource(source: Source): SuspendTest<R> = object : SuspendTest<R> by this {
+            override fun source(): Source = source
         }
     }
 
