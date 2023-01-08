@@ -32,7 +32,10 @@ class GradlePlugin : KotlinCompilerPluginSupportPlugin {
         val project = kotlinCompilation.target.project
 
         return project.provider {
-          emptyList()
+            listOf(SubpluginOption(
+                "projectDir",
+                project.projectDir.path
+            ))
         }
     }
 }
