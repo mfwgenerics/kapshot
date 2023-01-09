@@ -9,9 +9,9 @@ class CapturedLocationTests {
             2 + 2
         }
 
-        val location = block.source().location
+        val location = block.source.location
 
-        assertEquals("2 + 2", block.source().text)
+        assertEquals("2 + 2", block.source.text)
         assertEquals("src/test/kotlin/CapturedLocationTests.kt", location.path)
 
         assertEquals(223, location.from.char)
@@ -29,16 +29,16 @@ class CapturedLocationTests {
 
         }
 
-        val location = block.source().location
+        val location = block.source.location
 
-        assertEquals("", block.source().text)
+        assertEquals("", block.source.text)
         assertEquals("src/test/kotlin/CapturedLocationTests.kt", location.path)
 
-        assertEquals(767, location.from.char)
+        assertEquals(763, location.from.char)
         assertEquals(35, location.from.column)
         assertEquals(27, location.from.line)
 
-        assertEquals(767, location.to.char)
+        assertEquals(763, location.to.char)
         assertEquals(35, location.to.column)
         assertEquals(27, location.to.line)
     }
@@ -47,16 +47,16 @@ class CapturedLocationTests {
     fun `really empty block`() {
         val block = CapturedBlock {}
 
-        val location = block.source().location
+        val location = block.source.location
 
-        assertEquals("", block.source().text)
+        assertEquals("", block.source.text)
         assertEquals("src/test/kotlin/CapturedLocationTests.kt", location.path)
 
-        assertEquals(1311, location.from.char)
+        assertEquals(1303, location.from.char)
         assertEquals(35, location.from.column)
         assertEquals(47, location.from.line)
 
-        assertEquals(1311, location.to.char)
+        assertEquals(1303, location.to.char)
         assertEquals(35, location.to.column)
         assertEquals(47, location.to.line)
     }

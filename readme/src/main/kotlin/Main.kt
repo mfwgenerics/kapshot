@@ -4,7 +4,7 @@ import kotlin.io.path.writeText
 
 fun execSource(block: CapturedBlock<*>): String {
     block()
-    return block.source().text
+    return block.source.text
 }
 
 @CaptureSource
@@ -15,7 +15,7 @@ fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
 
     /* withSource is called by the plugin to add source information */
     override fun withSource(source: Source): CustomCapturable<T, R> =
-        object : CustomCapturable<T, R> by this { override fun source(): Source = source }
+        object : CustomCapturable<T, R> by this { override val source = source }
 }
 
 fun generateMarkdown(): String {
@@ -56,7 +56,7 @@ ${
             println("Hello!")
         }
 
-        check(captured.source().text == """println("Hello!")""")
+        check(captured.source.text == """println("Hello!")""")
     }
 }
 ```
@@ -71,7 +71,7 @@ ${
         fun equation(block: CapturedBlock<Int>): String {
             val result = block() // invoke the block
 
-            return "${block.source()} = $result"
+            return "${block.source} = $result"
         }
 
         check(equation { 2 + 2 } == "2 + 2 = 4")
@@ -99,7 +99,7 @@ in a similar way to `${blockClass.simpleName}` from above.
 ${
     execSource {
         fun <T> List<T>.mapped(block: CustomCapturable<T, T>): String {
-            return "$this.map { ${block.source()} } = ${map { block(it) }}"
+            return "$this.map { ${block.source} } = ${map { block(it) }}"
         }
 
         check(

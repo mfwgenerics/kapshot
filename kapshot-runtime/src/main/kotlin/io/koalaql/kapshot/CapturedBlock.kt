@@ -5,7 +5,7 @@ fun interface CapturedBlock<T>: Capturable<CapturedBlock<T>> {
 
     override fun withSource(source: Source): CapturedBlock<T> {
         return object : CapturedBlock<T> by this {
-            override fun source(): Source = source
+            override val source = source
         }
     }
 }

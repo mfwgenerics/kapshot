@@ -14,7 +14,7 @@ class CapturedBlockTests {
         block: CapturedBlock<T>
     ) {
         assertEquals(result, block())
-        assertEquals(source, block.source().text)
+        assertEquals(source, block.source.text)
     }
 
     @Test
@@ -82,7 +82,7 @@ i""",
 
     @Test
     fun `embedded string literal test`() {
-        fun <T : Any> sourceOf(block: CapturedBlock<T>): String = block.source().text
+        fun <T : Any> sourceOf(block: CapturedBlock<T>): String = block.source.text
 
         assertEquals("""🎅|${sourceOf {
             2 + 2
@@ -93,14 +93,14 @@ i""",
         operator fun invoke(arg: T): R
 
         override fun withSource(source: Source): CapturedTest1<T, R> = object : CapturedTest1<T, R> by this {
-            override fun source(): Source = source
+            override val source = source
         }
     }
 
     @Test
     fun `user defined unary capture block`() {
         fun List<Int>.sourceyMap(block: CapturedTest1<Int, Int>): String {
-            return "$this.map { ${block.source()} } = ${map { block(it) }}"
+            return "$this.map { ${block.source} } = ${map { block(it) }}"
         }
 
         assertEquals(
@@ -113,13 +113,13 @@ i""",
         suspend operator fun invoke(): R
 
         override fun withSource(source: Source): SuspendTest<R> = object : SuspendTest<R> by this {
-            override fun source(): Source = source
+            override val source = source
         }
     }
 
     @Test
     fun `user defined suspend capture`() {
-        suspend fun suspends(block: SuspendTest<Int>): String = "${block.source()}=${10 + block()})"
+        suspend fun suspends(block: SuspendTest<Int>): String = "${block.source}=${10 + block()})"
 
         runBlocking {
             assertEquals("suspendCoroutine { it.resume(32) }=42)", suspends {
