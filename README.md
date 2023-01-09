@@ -117,13 +117,9 @@ The `Source::location` property
 contains information about the location of captured source code
 including the file path (relative to the project root directory)
 and the char, line and column offsets for both the start
-and end of the captured source.
-
-Char, line and column offsets are 0-indexed.
+and end of the captured source. Offsets are 0-indexed.
 
 
-
-The code:
 
 ```kotlin
 val source = CapturedBlock { 2 + 2 }.source
@@ -136,10 +132,10 @@ println(
 )
 ```
 
-Prints the following:
+The code above will print the following:
 
 ```
-`2 + 2` found in src/main/kotlin/Main.kt @ line 190
+`2 + 2` found in src/main/kotlin/Main.kt @ line 188
 ```
 
 
