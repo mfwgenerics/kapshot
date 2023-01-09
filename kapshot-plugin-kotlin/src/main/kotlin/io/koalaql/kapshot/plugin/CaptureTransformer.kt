@@ -81,6 +81,13 @@ class CaptureTransformer(
 
             val trimmed = fileText.substring(startOffset, endOffset).trimIndent().trim()
 
+            /*
+            we keep trimming whitespace so encodeSourceLocation matches trimmed.
+            TODO roll trimIndent().trim() ourselves
+            */
+            while (endOffset > startOffset && fileText[endOffset - 1].isWhitespace()) endOffset--
+            while (startOffset < endOffset && fileText[startOffset].isWhitespace()) startOffset++
+
             addSourceCall.putTypeArgument(0, expression.type)
 
             /* super call here rather than directly using expression is required to support nesting. otherwise we don't transform the subtree */

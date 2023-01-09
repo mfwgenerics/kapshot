@@ -13,8 +13,8 @@ class CapturedLocationTests {
 
         assertEquals("2 + 2", block.source().text)
         assertEquals("src/test/kotlin/CapturedLocationTests.kt", location.path)
-        assertEquals(210, location.from.char)
-        assertEquals(13, location.from.column)
-        assertEquals(9, location.from.line)
+        assertEquals(223, location.from.char)
+        assertEquals(12, location.from.column)
+        assertEquals(8, location.from.line)
     }
 }
