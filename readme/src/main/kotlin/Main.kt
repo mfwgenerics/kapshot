@@ -130,7 +130,7 @@ ${
         }
         
         check(
-            sourceOf<MyClass>() ==
+            sourceOf<MyClass>().text ==
             """
             class MyClass {
                 @CaptureSource
@@ -140,7 +140,7 @@ ${
         )
         
         check(
-            sourceOf(MyClass::twelve) ==
+            sourceOf(MyClass::twelve).text ==
             "fun twelve() = 12"
         )
     }

@@ -4,16 +4,10 @@ import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.sourceElement
-import org.jetbrains.kotlin.backend.jvm.ir.getStringConstArgument
-import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.builders.IrSingleStatementBuilder
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irString
-import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationBase
-import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.declarations.path
+import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrTypeOperator
 import org.jetbrains.kotlin.ir.expressions.IrTypeOperatorCall
@@ -21,10 +15,7 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.util.dump
-import org.jetbrains.kotlin.ir.util.dumpKotlinLike
 import org.jetbrains.kotlin.ir.util.kotlinFqName
-import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -41,17 +32,33 @@ class CaptureTransformer(
         return File(currentFile.path).readText().replace("\r\n", "\n")
     }
 
-    private fun encodeSourceLocation(
+    private class Source(
+        val text: String,
+        val location: String
+    )
+
+    private fun extractSource(
+        fileText: String,
         start: Int,
-        end: Int
-    ): String {
+        end: Int,
+    ): Source {
         val entry = currentFile.fileEntry
         val path = projectDir.relativize(Path(currentFile.path))
+
+        /* trim offsets so source location info matches .trimIndent().trim(). TODO roll trimIndent().trim() ourselves */
+        var trimmedStart = start
+        var trimmedEnd = end
+
+        while (trimmedEnd > trimmedStart && fileText[trimmedEnd - 1].isWhitespace()) trimmedEnd--
+        while (trimmedStart < trimmedEnd && fileText[trimmedStart].isWhitespace()) trimmedStart++
 
         fun encodeOffset(offset: Int): String =
             "$offset,${entry.getLineNumber(offset)},${entry.getColumnNumber(offset)}"
 
-        return "$path\n${encodeOffset(start)}\n${encodeOffset(end)}"
+        return Source(
+            text = fileText.substring(start, end).trimIndent().trim(),
+            location = "$path\n${encodeOffset(trimmedStart)}\n${encodeOffset(trimmedEnd)}"
+        )
     }
 
     private fun transformSam(expression: IrTypeOperatorCall): IrExpression {
@@ -79,21 +86,14 @@ class CaptureTransformer(
                 startOffset++
             }
 
-            val trimmed = fileText.substring(startOffset, endOffset).trimIndent().trim()
-
-            /*
-            we keep trimming whitespace so encodeSourceLocation matches trimmed.
-            TODO roll trimIndent().trim() ourselves
-            */
-            while (endOffset > startOffset && fileText[endOffset - 1].isWhitespace()) endOffset--
-            while (startOffset < endOffset && fileText[startOffset].isWhitespace()) startOffset++
+            val source = extractSource(fileText, startOffset, endOffset)
 
             addSourceCall.putTypeArgument(0, expression.type)
 
             /* super call here rather than directly using expression is required to support nesting. otherwise we don't transform the subtree */
             addSourceCall.putValueArgument(0, super.visitTypeOperator(expression))
-            addSourceCall.putValueArgument(1, irString(encodeSourceLocation(startOffset, endOffset)))
-            addSourceCall.putValueArgument(2, irString(trimmed))
+            addSourceCall.putValueArgument(1, irString(source.location))
+            addSourceCall.putValueArgument(2, irString(source.text))
 
             addSourceCall
         }
@@ -130,16 +130,29 @@ class CaptureTransformer(
         }
 
         if (captureSource != null) {
-            val fileText = currentFileText()
-
-            /* we start from end of captureSource rather than declaration.startOffset to exclude the capture annotation */
-            val startOffset = captureSource.endOffset
-            val endOffset = declaration.endOffset
-
-            val trimmed = fileText.substring(startOffset, endOffset).trimIndent().trim()
+            val source = extractSource(
+                currentFileText(),
+                /* we start from end of captureSource rather than declaration.startOffset to exclude the capture annotation */
+                captureSource.endOffset,
+                declaration.endOffset
+            )
 
             captureSource.putValueArgument(0,
-                IrConstImpl.string(captureSource.startOffset, captureSource.endOffset, context.irBuiltIns.stringType, trimmed)
+                IrConstImpl.string(
+                    captureSource.startOffset,
+                    captureSource.endOffset,
+                    context.irBuiltIns.stringType,
+                    source.location
+                )
+            )
+
+            captureSource.putValueArgument(1,
+                IrConstImpl.string(
+                    captureSource.startOffset,
+                    captureSource.endOffset,
+                    context.irBuiltIns.stringType,
+                    source.text
+                )
             )
         }
 

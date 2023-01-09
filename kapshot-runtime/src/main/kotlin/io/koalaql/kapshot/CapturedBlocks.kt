@@ -1,10 +1,6 @@
 package io.koalaql.kapshot
 
-fun <T : Capturable<T>> addSourceToBlock(
-    block: Capturable<T>,
-    location: String,
-    source: String
-): T {
+fun parseLocation(location: String): SourceLocation {
     fun parseOffset(offset: String): SourceOffset = offset
         .splitToSequence(",")
         .take(3)
@@ -18,7 +14,7 @@ fun <T : Capturable<T>> addSourceToBlock(
             )
         }
 
-    val parsedLocation = location
+    return location
         .splitToSequence("\n")
         .take(3)
         .toList()
@@ -29,8 +25,14 @@ fun <T : Capturable<T>> addSourceToBlock(
                 to = parseOffset(it[2])
             )
         }
+}
 
+fun <T : Capturable<T>> addSourceToBlock(
+    block: Capturable<T>,
+    location: String,
+    source: String
+): T {
     return block.withSource(
-        Source(parsedLocation, source)
+        Source(parseLocation(location), source)
     )
 }
