@@ -13,9 +13,14 @@ class CapturedLocationTests {
 
         assertEquals("2 + 2", block.source().text)
         assertEquals("src/test/kotlin/CapturedLocationTests.kt", location.path)
+
         assertEquals(223, location.from.char)
         assertEquals(12, location.from.column)
         assertEquals(8, location.from.line)
+
+        assertEquals(228, location.to.char)
+        assertEquals(17, location.to.column)
+        assertEquals(8, location.to.line)
     }
 
     @Test
@@ -28,9 +33,14 @@ class CapturedLocationTests {
 
         assertEquals("", block.source().text)
         assertEquals("src/test/kotlin/CapturedLocationTests.kt", location.path)
-        assertEquals(634, location.from.char)
+
+        assertEquals(767, location.from.char)
         assertEquals(35, location.from.column)
-        assertEquals(22, location.from.line)
+        assertEquals(27, location.from.line)
+
+        assertEquals(767, location.to.char)
+        assertEquals(35, location.to.column)
+        assertEquals(27, location.to.line)
     }
 
     @Test
@@ -41,8 +51,13 @@ class CapturedLocationTests {
 
         assertEquals("", block.source().text)
         assertEquals("src/test/kotlin/CapturedLocationTests.kt", location.path)
-        assertEquals(1044, location.from.char)
+
+        assertEquals(1311, location.from.char)
         assertEquals(35, location.from.column)
-        assertEquals(37, location.from.line)
+        assertEquals(47, location.from.line)
+
+        assertEquals(1311, location.to.char)
+        assertEquals(35, location.to.column)
+        assertEquals(47, location.to.line)
     }
 }
