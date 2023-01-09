@@ -26,10 +26,12 @@ import org.jetbrains.kotlin.ir.util.dumpKotlinLike
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import java.io.File
+import java.nio.file.Path
 import kotlin.io.path.Path
 
 class CaptureTransformer(
     private val context: IrPluginContext,
+    private val projectDir: Path,
     private val addSourceToBlock: IrSimpleFunctionSymbol,
     private val capturableFqn: String = "io.koalaql.kapshot.Capturable",
     private val captureSourceFqn: String = "io.koalaql.kapshot.CaptureSource",
@@ -44,11 +46,12 @@ class CaptureTransformer(
         end: Int
     ): String {
         val entry = currentFile.fileEntry
+        val path = projectDir.relativize(Path(currentFile.path))
 
         fun encodeOffset(offset: Int): String =
             "$offset,${entry.getLineNumber(offset)},${entry.getColumnNumber(offset)}"
 
-        return "\n${encodeOffset(start)}\n${encodeOffset(end)}"
+        return "$path\n${encodeOffset(start)}\n${encodeOffset(end)}"
     }
 
     private fun transformSam(expression: IrTypeOperatorCall): IrExpression {
