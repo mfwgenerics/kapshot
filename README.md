@@ -16,8 +16,8 @@ plugins {
 ### Capturing Blocks
 
 Now your Kotlin code can use `CapturedBlock<T>` as a source enriched replacement for `() -> T`.
-You can call `source()` on any instance of
-`CapturedBlock` to access the source text for that block.
+You can use the `source` property on any instance of
+`CapturedBlock` to access the source for that block.
 
 ```kotlin
 import io.koalaql.kapshot.CapturedBlock
@@ -110,6 +110,39 @@ check(
     "fun twelve() = 12"
 )
 ```
+
+### Source Location
+ 
+The `Source::location` property
+contains information about the location of captured source code
+including the file path (relative to the project root directory)
+and the char, line and column offsets for both the start
+and end of the captured source.
+
+Char, line and column offsets are 0-indexed.
+
+
+
+The code:
+
+```kotlin
+val source = CapturedBlock { 2 + 2 }.source
+val location = source.location
+
+println(
+    "`${source.text}`"
+    + " found in ${location.path}"
+    + " @ line ${location.from.line+1}"
+)
+```
+
+Prints the following:
+
+```
+`2 + 2` found in src/main/kotlin/Main.kt @ line 190
+```
+
+
 
 ## Purpose
 

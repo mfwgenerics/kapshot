@@ -2,8 +2,33 @@ import io.koalaql.kapshot.*
 import kotlin.io.path.Path
 import kotlin.io.path.writeText
 
+class FakePrintln {
+    val printed = StringBuilder()
+
+    fun println(out: String) {
+        printed.append(out)
+        printed.append("\n")
+    }
+
+    override fun toString(): String = "$printed"
+}
+
+fun interface PrintingBlock: Capturable<PrintingBlock> {
+    operator fun FakePrintln.invoke()
+
+    override fun withSource(source: Source): PrintingBlock = object : PrintingBlock by this {
+        override val source: Source = source
+    }
+}
+
 fun execSource(block: CapturedBlock<*>): String {
     block()
+    return block.source.text
+}
+
+fun printSource(println: FakePrintln, block: PrintingBlock): String {
+    with (block) { println.invoke() }
+
     return block.source.text
 }
 
@@ -44,8 +69,8 @@ plugins {
 ### Capturing Blocks
 
 Now your Kotlin code can use `${blockClass.simpleName}<T>` as a source enriched replacement for `() -> T`.
-You can call `${CapturedBlock<*>::source.name}()` on any instance of
-`${blockClass.simpleName}` to access the source text for that block.
+You can use the `${CapturedBlock<*>::source.name}` property on any instance of
+`${blockClass.simpleName}` to access the source for that block.
 
 ```kotlin
 $importStatement
@@ -146,6 +171,48 @@ ${
     }
 }
 ```
+
+### Source Location
+ 
+The `${Source::class.simpleName}::${Source::location.name}` property
+contains information about the location of captured source code
+including the file path (relative to the project root directory)
+and the char, line and column offsets for both the start
+and end of the captured source.
+
+Char, line and column offsets are 0-indexed.
+
+${run {
+        
+val println = FakePrintln()
+    
+val source = printSource(println) {
+    val source = CapturedBlock { 2 + 2 }.source
+    val location = source.location
+    
+    println(
+        "`${source.text}`"
+        + " found in ${location.path}"
+        + " @ line ${location.from.line+1}"
+    )
+}
+        
+"""
+
+The code:
+
+```kotlin
+$source
+```
+
+Prints the following:
+
+```
+${println.toString().trim()}
+```
+
+"""
+}}
 
 ## Purpose
 
