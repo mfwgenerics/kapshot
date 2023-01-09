@@ -5,7 +5,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
-private fun sourceOf(annotations: List<Annotation>, name: () -> String): String {
+private fun sourceOf(annotations: List<Annotation>, name: () -> String): Source {
     val anno = annotations
         .singleOrNull { it.annotationClass == CaptureSource::class }
         ?: error("sourceOf call on ${name()} requires the CaptureSource annotation")
@@ -14,10 +14,13 @@ private fun sourceOf(annotations: List<Annotation>, name: () -> String): String 
 
     check(anno.text.isNotBlank()) { "missing source text" }
 
-    return anno.text
+    return Source(
+        location = parseLocation(anno.location),
+        text = anno.text
+    )
 }
 
-fun sourceOf(type: KType): String {
+fun sourceOf(type: KType): Source {
     val classifier = checkNotNull(type.classifier as? KClass<*>) { "$type is not a supported target of source capture"}
 
     return sourceOf(classifier.annotations) { "$type" }
@@ -25,5 +28,5 @@ fun sourceOf(type: KType): String {
 
 inline fun <reified T : Any> sourceOf() = sourceOf(typeOf<T>())
 
-fun sourceOf(method: KFunction<*>): String =
+fun sourceOf(method: KFunction<*>): Source =
     sourceOf(method.annotations) { method.name }

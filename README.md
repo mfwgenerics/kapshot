@@ -9,15 +9,15 @@ Include the `io.koalaql.kapshot-plugin` Gradle plugin in your `build.gradle.kts`
 plugins {
     /* ... */
 
-    id("io.koalaql.kapshot-plugin") version "0.0.3"
+    id("io.koalaql.kapshot-plugin") version "0.1.0"
 }
 ```
 
 ### Capturing Blocks
 
 Now your Kotlin code can use `CapturedBlock<T>` as a source enriched replacement for `() -> T`.
-You can call `source()` on any instance of
-`CapturedBlock` to access the source text for that block.
+You can use the `source` property on any instance of
+`CapturedBlock` to access the source for that block.
 
 ```kotlin
 import io.koalaql.kapshot.CapturedBlock
@@ -26,7 +26,7 @@ val captured = CapturedBlock {
     println("Hello!")
 }
 
-check(captured.source() == """println("Hello!")""")
+check(captured.source.text == """println("Hello!")""")
 ```
 
 You can invoke the block similar to a regular function: 
@@ -37,7 +37,7 @@ import io.koalaql.kapshot.CapturedBlock
 fun equation(block: CapturedBlock<Int>): String {
     val result = block() // invoke the block
 
-    return "${block.source()} = $result"
+    return "${block.source} = $result"
 }
 
 check(equation { 2 + 2 } == "2 + 2 = 4")
@@ -59,8 +59,8 @@ fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
     operator fun invoke(arg: T): R
 
     /* withSource is called by the plugin to add source information */
-    override fun withSource(source: String): CustomCapturable<T, R> =
-        object : CustomCapturable<T, R> by this { override fun source(): String = source }
+    override fun withSource(source: Source): CustomCapturable<T, R> =
+        object : CustomCapturable<T, R> by this { override val source = source }
 }
 ```
 
@@ -69,7 +69,7 @@ in a similar way to `CapturedBlock` from above.
 
 ```kotlin
 fun <T> List<T>.mapped(block: CustomCapturable<T, T>): String {
-    return "$this.map { ${block.source()} } = ${map { block(it) }}"
+    return "$this.map { ${block.source} } = ${map { block(it) }}"
 }
 
 check(
@@ -96,7 +96,7 @@ class MyClass {
 }
 
 check(
-    sourceOf<MyClass>() ==
+    sourceOf<MyClass>().text ==
     """
     class MyClass {
         @CaptureSource
@@ -106,10 +106,39 @@ check(
 )
 
 check(
-    sourceOf(MyClass::twelve) ==
+    sourceOf(MyClass::twelve).text ==
     "fun twelve() = 12"
 )
 ```
+
+### Source Location
+ 
+The `Source::location` property
+contains information about the location of captured source code
+including the file path (relative to the project root directory)
+and the char, line and column offsets for both the start
+and end of the captured source. Offsets are 0-indexed.
+
+
+
+```kotlin
+val source = CapturedBlock { 2 + 2 }.source
+val location = source.location
+
+println(
+    "`${source.text}`"
+    + " found in ${location.path}"
+    + " @ line ${location.from.line+1}"
+)
+```
+
+The code above will print the following:
+
+```
+`2 + 2` found in src/main/kotlin/Main.kt @ line 188
+```
+
+
 
 ## Purpose
 

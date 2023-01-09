@@ -1,13 +1,35 @@
-import io.koalaql.kapshot.Capturable
-import io.koalaql.kapshot.CaptureSource
-import io.koalaql.kapshot.CapturedBlock
-import io.koalaql.kapshot.sourceOf
+import io.koalaql.kapshot.*
 import kotlin.io.path.Path
 import kotlin.io.path.writeText
 
+class FakePrintln {
+    val printed = StringBuilder()
+
+    fun println(out: String) {
+        printed.append(out)
+        printed.append("\n")
+    }
+
+    override fun toString(): String = "$printed"
+}
+
+fun interface PrintingBlock: Capturable<PrintingBlock> {
+    operator fun FakePrintln.invoke()
+
+    override fun withSource(source: Source): PrintingBlock = object : PrintingBlock by this {
+        override val source: Source = source
+    }
+}
+
 fun execSource(block: CapturedBlock<*>): String {
     block()
-    return block.source()
+    return block.source.text
+}
+
+fun printSource(println: FakePrintln, block: PrintingBlock): String {
+    with (block) { println.invoke() }
+
+    return block.source.text
 }
 
 @CaptureSource
@@ -17,8 +39,8 @@ fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
     operator fun invoke(arg: T): R
 
     /* withSource is called by the plugin to add source information */
-    override fun withSource(source: String): CustomCapturable<T, R> =
-        object : CustomCapturable<T, R> by this { override fun source(): String = source }
+    override fun withSource(source: Source): CustomCapturable<T, R> =
+        object : CustomCapturable<T, R> by this { override val source = source }
 }
 
 fun generateMarkdown(): String {
@@ -40,15 +62,15 @@ Include the `io.koalaql.kapshot-plugin` Gradle plugin in your `build.gradle.kts`
 plugins {
     /* ... */
 
-    id("io.koalaql.kapshot-plugin") version "0.0.3"
+    id("io.koalaql.kapshot-plugin") version "0.1.0"
 }
 ```
 
 ### Capturing Blocks
 
 Now your Kotlin code can use `${blockClass.simpleName}<T>` as a source enriched replacement for `() -> T`.
-You can call `${CapturedBlock<*>::source.name}()` on any instance of
-`${blockClass.simpleName}` to access the source text for that block.
+You can use the `${CapturedBlock<*>::source.name}` property on any instance of
+`${blockClass.simpleName}` to access the source for that block.
 
 ```kotlin
 $importStatement
@@ -59,7 +81,7 @@ ${
             println("Hello!")
         }
 
-        check(captured.source() == """println("Hello!")""")
+        check(captured.source.text == """println("Hello!")""")
     }
 }
 ```
@@ -74,7 +96,7 @@ ${
         fun equation(block: CapturedBlock<Int>): String {
             val result = block() // invoke the block
 
-            return "${block.source()} = $result"
+            return "${block.source} = $result"
         }
 
         check(equation { 2 + 2 } == "2 + 2 = 4")
@@ -102,7 +124,7 @@ in a similar way to `${blockClass.simpleName}` from above.
 ${
     execSource {
         fun <T> List<T>.mapped(block: CustomCapturable<T, T>): String {
-            return "$this.map { ${block.source()} } = ${map { block(it) }}"
+            return "$this.map { ${block.source} } = ${map { block(it) }}"
         }
 
         check(
@@ -133,7 +155,7 @@ ${
         }
         
         check(
-            sourceOf<MyClass>() ==
+            sourceOf<MyClass>().text ==
             """
             class MyClass {
                 @CaptureSource
@@ -143,12 +165,50 @@ ${
         )
         
         check(
-            sourceOf(MyClass::twelve) ==
+            sourceOf(MyClass::twelve).text ==
             "fun twelve() = 12"
         )
     }
 }
 ```
+
+### Source Location
+ 
+The `${Source::class.simpleName}::${Source::location.name}` property
+contains information about the location of captured source code
+including the file path (relative to the project root directory)
+and the char, line and column offsets for both the start
+and end of the captured source. Offsets are 0-indexed.
+
+${run {
+        
+val println = FakePrintln()
+    
+val source = printSource(println) {
+    val source = CapturedBlock { 2 + 2 }.source
+    val location = source.location
+    
+    println(
+        "`${source.text}`"
+        + " found in ${location.path}"
+        + " @ line ${location.from.line+1}"
+    )
+}
+        
+"""
+
+```kotlin
+$source
+```
+
+The code above will print the following:
+
+```
+${println.toString().trim()}
+```
+
+"""
+}}
 
 ## Purpose
 

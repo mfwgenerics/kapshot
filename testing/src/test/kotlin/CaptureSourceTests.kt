@@ -16,6 +16,8 @@ class CaptureSourceTests {
 
     @Test
     fun `capture class source`() {
+        val source = sourceOf<TestClass>()
+
         assertEquals(
             """
             interface TestClass {
@@ -27,8 +29,20 @@ class CaptureSourceTests {
                 }
             }
             """.trimIndent(),
-            sourceOf<TestClass>()
+            source.text
         )
+
+        val location = source.location
+
+        assertEquals("src/test/kotlin/CaptureSourceTests.kt", location.path)
+
+        assertEquals(182, location.from.char)
+        assertEquals(7, location.from.line)
+        assertEquals(4, location.from.column)
+
+        assertEquals(329, location.to.char)
+        assertEquals(14, location.to.line)
+        assertEquals(5, location.to.column)
     }
 
     @Test
@@ -39,7 +53,7 @@ class CaptureSourceTests {
                 val test get() = "nest"
             }
             """.trimIndent(),
-            sourceOf<TestClass.Nested>()
+            sourceOf<TestClass.Nested>().text
         )
     }
 
@@ -53,11 +67,11 @@ class CaptureSourceTests {
 
         assertEquals(
             capMethodSourceSource,
-            sourceOf(::`capture method source`)
+            sourceOf(::`capture method source`).text
         )
 
         assertEquals(
-            "fun five() = 5", sourceOf(Inner::five)
+            "fun five() = 5", sourceOf(Inner::five).text
         )
     }
     """.trimIndent()
@@ -72,11 +86,11 @@ class CaptureSourceTests {
 
         assertEquals(
             capMethodSourceSource,
-            sourceOf(::`capture method source`)
+            sourceOf(::`capture method source`).text
         )
 
         assertEquals(
-            "fun five() = 5", sourceOf(Inner::five)
+            "fun five() = 5", sourceOf(Inner::five).text
         )
     }
 
@@ -107,7 +121,7 @@ class CaptureSourceTests {
                 fun type() = "interface"
             }
             """.trimIndent(),
-            sourceOf<CapturedInterface>()
+            sourceOf<CapturedInterface>().text
         )
 
         assertEquals(
@@ -116,7 +130,7 @@ class CaptureSourceTests {
                 val test = "123"
             }
             """.trimIndent(),
-            sourceOf<CapturedObj>()
+            sourceOf<CapturedObj>().text
         )
 
         assertEquals(
@@ -129,14 +143,14 @@ class CaptureSourceTests {
                 companion object { }
             }
             """.trimIndent(),
-            sourceOf<CapturedSealed>()
+            sourceOf<CapturedSealed>().text
         )
 
         assertEquals(
             """
                 companion object { }
             """.trimIndent(),
-            sourceOf<CapturedSealed.Companion>()
+            sourceOf<CapturedSealed.Companion>().text
         )
     }
 }
