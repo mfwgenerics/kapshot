@@ -9,7 +9,7 @@ Include the `io.koalaql.kapshot-plugin` Gradle plugin in your `build.gradle.kts`
 plugins {
     /* ... */
 
-    id("io.koalaql.kapshot-plugin") version "0.0.3"
+    id("io.koalaql.kapshot-plugin") version "0.1.0"
 }
 ```
 
@@ -26,7 +26,7 @@ val captured = CapturedBlock {
     println("Hello!")
 }
 
-check(captured.source() == """println("Hello!")""")
+check(captured.source.text == """println("Hello!")""")
 ```
 
 You can invoke the block similar to a regular function: 
@@ -37,7 +37,7 @@ import io.koalaql.kapshot.CapturedBlock
 fun equation(block: CapturedBlock<Int>): String {
     val result = block() // invoke the block
 
-    return "${block.source()} = $result"
+    return "${block.source} = $result"
 }
 
 check(equation { 2 + 2 } == "2 + 2 = 4")
@@ -59,8 +59,8 @@ fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
     operator fun invoke(arg: T): R
 
     /* withSource is called by the plugin to add source information */
-    override fun withSource(source: String): CustomCapturable<T, R> =
-        object : CustomCapturable<T, R> by this { override fun source(): String = source }
+    override fun withSource(source: Source): CustomCapturable<T, R> =
+        object : CustomCapturable<T, R> by this { override val source = source }
 }
 ```
 
@@ -69,7 +69,7 @@ in a similar way to `CapturedBlock` from above.
 
 ```kotlin
 fun <T> List<T>.mapped(block: CustomCapturable<T, T>): String {
-    return "$this.map { ${block.source()} } = ${map { block(it) }}"
+    return "$this.map { ${block.source} } = ${map { block(it) }}"
 }
 
 check(
@@ -96,7 +96,7 @@ class MyClass {
 }
 
 check(
-    sourceOf<MyClass>() ==
+    sourceOf<MyClass>().text ==
     """
     class MyClass {
         @CaptureSource
@@ -106,7 +106,7 @@ check(
 )
 
 check(
-    sourceOf(MyClass::twelve) ==
+    sourceOf(MyClass::twelve).text ==
     "fun twelve() = 12"
 )
 ```
