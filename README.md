@@ -1,4 +1,5 @@
 # Kapshot
+
 Kapshot is a simple Kotlin compiler plugin for capturing source code text from closure blocks and declarations.
 
 ## Usage
@@ -29,7 +30,7 @@ val captured = CapturedBlock {
 check(captured.source.text == """println("Hello!")""")
 ```
 
-You can invoke the block similar to a regular function: 
+You can invoke the block similar to a regular function:
 
 ```kotlin
 import io.koalaql.kapshot.CapturedBlock
@@ -79,7 +80,7 @@ check(
 ```
 
 If it is present, the block's argument list is considered part of its source text.
- 
+
 ### Declarations
 
 You can capture declaration sources using the `@CaptureSource`
@@ -112,14 +113,12 @@ check(
 ```
 
 ### Source Location
- 
+
 The `Source::location` property
 contains information about the location of captured source code
 including the file path (relative to the project root directory)
 and the char, line and column offsets for both the start
 and end of the captured source. Offsets are 0-indexed.
-
-
 
 ```kotlin
 val source = CapturedBlock { 2 + 2 }.source
@@ -135,15 +134,13 @@ println(
 The code above will print the following:
 
 ```
-`2 + 2` found in src/main/kotlin/Main.kt @ line 189
+`2 + 2` found in src/main/kotlin/Main.kt @ line 176
 ```
-
-
 
 ## Purpose
 
 The purpose of this plugin is to support experimental literate
-programming and documentation generation techniques in Kotlin.
+programming and documentation generation techniques in Kotlin
 
 An example of this is the code used to generate this README.md.
 Capturing source from blocks allows sample code to be run and
