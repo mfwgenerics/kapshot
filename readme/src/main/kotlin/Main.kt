@@ -1,4 +1,7 @@
 import io.koalaql.kapshot.*
+import io.koalaql.markout.markout
+import io.koalaql.markout.md.Markdown
+import io.koalaql.markout.md.markdown
 import kotlin.io.path.Path
 import kotlin.io.path.writeText
 
@@ -43,86 +46,79 @@ fun interface CustomCapturable<T, R> : Capturable<CustomCapturable<T, R>> {
         object : CustomCapturable<T, R> by this { override val source = source }
 }
 
-fun generateMarkdown(): String {
+fun Markdown.generateMarkdown() {
     val capturableClass = Capturable::class
     val blockClass = CapturedBlock::class
     val captureAnno = CaptureSource::class
 
     val importStatement = "import ${blockClass.qualifiedName}"
 
-    return """
-# Kapshot
-Kapshot is a simple Kotlin compiler plugin for capturing source code text from closure blocks and declarations.
+    h1("Kapshot")
 
-## Usage
+    +"Kapshot is a simple Kotlin compiler plugin for capturing "
+    +"source code text from closure blocks and declarations."
 
-Include the `io.koalaql.kapshot-plugin` Gradle plugin in your `build.gradle.kts`:
+    h2("Usage")
 
-```kotlin
-plugins {
-    /* ... */
+    +"Include the `io.koalaql.kapshot-plugin` Gradle plugin in your `build.gradle.kts`:"
 
-    id("io.koalaql.kapshot-plugin") version "0.1.0"
-}
-```
-
-### Capturing Blocks
-
-Now your Kotlin code can use `${blockClass.simpleName}<T>` as a source enriched replacement for `() -> T`.
-You can use the `${CapturedBlock<*>::source.name}` property on any instance of
-`${blockClass.simpleName}` to access the source for that block.
-
-```kotlin
-$importStatement
-
-${
-    execSource {
-        val captured = CapturedBlock {
-            println("Hello!")
+    code("kotlin",
+        """
+        plugins {
+            /* ... */
+    
+            id("io.koalaql.kapshot-plugin") version "0.1.0"
         }
+        """.trimIndent()
+    )
 
-        check(captured.source.text == """println("Hello!")""")
-    }
-}
-```
+    h3("Capturing Blocks")
 
-You can invoke the block similar to a regular function: 
+    +"Now your Kotlin code can use `${blockClass.simpleName}<T>` as a source enriched replacement for `() -> T`.\n"
+    +"You can use the `${CapturedBlock<*>::source.name}` property on any instance of\n"
+    +"`${blockClass.simpleName}` to access the source for that block."
 
-```kotlin
-$importStatement
+    code("kotlin",
+        "$importStatement\n\n" +
+        execSource {
+            val captured = CapturedBlock {
+                println("Hello!")
+            }
 
-${
-    execSource {
-        fun equation(block: CapturedBlock<Int>): String {
-            val result = block() // invoke the block
-
-            return "${block.source} = $result"
+            check(captured.source.text == """println("Hello!")""")
         }
+    )
 
-        check(equation { 2 + 2 } == "2 + 2 = 4")
-    }
-}
-```
+    +"You can invoke the block similar to a regular function:"
 
-### Parameterized Blocks
+    code("kotlin",
+        "$importStatement\n\n" +
+        execSource {
+            fun equation(block: CapturedBlock<Int>): String {
+                val result = block() // invoke the block
 
-The default `${blockClass.simpleName}` interface doesn't accept any
-arguments to `invoke` and is only generic on the return type. This
-means the captured source block must depend only on state from the
-enclosing scope. To write source capturing versions of builder blocks
-or common higher-order functions like `map` and `filter` you will
-need to define your own capture interface that extends `${capturableClass.simpleName}`.
+                return "${block.source} = $result"
+            }
 
-```kotlin
-${sourceOf<CustomCapturable<*, *>>()}
-```
+            check(equation { 2 + 2 } == "2 + 2 = 4")
+        }
+    )
 
-Once you have declared your own `${capturableClass.simpleName}` you can use it
-in a similar way to `${blockClass.simpleName}` from above.
+    h3("Parameterized Blocks")
 
-```kotlin
-${
-    execSource {
+    +"The default `${blockClass.simpleName}` interface doesn't accept any\n"
+    +"arguments to `invoke` and is only generic on the return type. This\n"
+    +"means the captured source block must depend only on state from the\n"
+    +"enclosing scope. To write source capturing versions of builder blocks\n"
+    +"or common higher-order functions like `map` and `filter` you will\n"
+    +"need to define your own capture interface that extends `${capturableClass.simpleName}`."
+
+    code("kotlin", sourceOf<CustomCapturable<*, *>>().text)
+
+    +"Once you have declared your own `${capturableClass.simpleName}` you can use it\n"
+    +"in a similar way to `${blockClass.simpleName}` from above."
+
+    code("kotlin", execSource {
         fun <T> List<T>.mapped(block: CustomCapturable<T, T>): String {
             return "$this.map { ${block.source} } = ${map { block(it) }}"
         }
@@ -131,23 +127,19 @@ ${
             listOf(1, 2, 3).mapped { x -> x*2 } ==
             "[1, 2, 3].map { x -> x*2 } = [2, 4, 6]"
         )
-    }
-}
-```
+    })
 
-If it is present, the block's argument list is considered part of its source text.
+    +"If it is present, the block's argument list is considered part of its source text."
  
-### Declarations
+    h3("Declarations")
 
-You can capture declaration sources using the `@${captureAnno.simpleName}`
-annotation. The source of annotated declarations can then be retrieved using
-`sourceOf<T>` for class declarations or `sourceOf(::method)` for method
-declarations. The source capture starts at the end of the `@${captureAnno.simpleName}`
-annotation.
+    +"You can capture declaration sources using the `@${captureAnno.simpleName}`\n"
+    +"annotation. The source of annotated declarations can then be retrieved using\n"
+    +"`sourceOf<T>` for class declarations or `sourceOf(::method)` for method\n"
+    +"declarations. The source capture starts at the end of the `@${captureAnno.simpleName}`\n"
+    +"annotation."
 
-```kotlin
-${
-    execSource {
+    code("kotlin", execSource {
         @CaptureSource
         class MyClass {
             @CaptureSource
@@ -168,62 +160,56 @@ ${
             sourceOf(MyClass::twelve).text ==
             "fun twelve() = 12"
         )
+    })
+
+    h3("Source Location")
+ 
+    +"The `${Source::class.simpleName}::${Source::location.name}` property\n"
+    +"contains information about the location of captured source code\n"
+    +"including the file path (relative to the project root directory)\n"
+    +"and the char, line and column offsets for both the start\n"
+    +"and end of the captured source. Offsets are 0-indexed."
+
+    val println = FakePrintln()
+
+    val source = printSource(println) {
+        val source = CapturedBlock { 2 + 2 }.source
+        val location = source.location
+
+        println(
+            "`${source.text}`"
+            + " found in ${location.path}"
+            + " @ line ${location.from.line+1}"
+        )
+    }
+
+    code("kotlin", source)
+
+    +"The code above will print the following:"
+
+    code(println.toString().trim())
+
+    h2("Purpose")
+
+    p {
+        +"The purpose of this plugin is to support experimental literate\n"
+        +"programming and documentation generation techniques in Kotlin"
+    }
+
+    p {
+        +"An example of this is the code used to generate this README.md.\n"
+        +"Capturing source from blocks allows sample code to be run and\n"
+        +"tested during generation."
+    }
+
+    val thisFile = "readme/${CapturedBlock {}.source.location.path}"
+
+    p {
+        +"View the source here: "
+        a(thisFile, thisFile)
     }
 }
-```
 
-### Source Location
- 
-The `${Source::class.simpleName}::${Source::location.name}` property
-contains information about the location of captured source code
-including the file path (relative to the project root directory)
-and the char, line and column offsets for both the start
-and end of the captured source. Offsets are 0-indexed.
-
-${run {
-        
-val println = FakePrintln()
-    
-val source = printSource(println) {
-    val source = CapturedBlock { 2 + 2 }.source
-    val location = source.location
-    
-    println(
-        "`${source.text}`"
-        + " found in ${location.path}"
-        + " @ line ${location.from.line+1}"
-    )
-}
-        
-"""
-
-```kotlin
-$source
-```
-
-The code above will print the following:
-
-```
-${println.toString().trim()}
-```
-
-"""
-}}
-
-## Purpose
-
-The purpose of this plugin is to support experimental literate
-programming and documentation generation techniques in Kotlin.
-
-An example of this is the code used to generate this README.md.
-Capturing source from blocks allows sample code to be run and
-tested during generation.
-
-View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Main.kt)
-
-    """.trim()
-}
-
-fun main() {
-    Path("../README.md").writeText(generateMarkdown())
+fun main() = markout(Path("..")) {
+    markdown("README") { generateMarkdown() }
 }
