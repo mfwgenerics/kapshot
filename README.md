@@ -135,7 +135,7 @@ println(
 The code above will print the following:
 
 ```
-`2 + 2` found in src/main/kotlin/Main.kt @ line 188
+`2 + 2` found in src/main/kotlin/Main.kt @ line 189
 ```
 
 

@@ -1,4 +1,5 @@
 import io.koalaql.kapshot.*
+import io.koalaql.markout.markout
 import kotlin.io.path.Path
 import kotlin.io.path.writeText
 
@@ -224,6 +225,6 @@ View the source here: [readme/src/main/kotlin/Main.kt](readme/src/main/kotlin/Ma
     """.trim()
 }
 
-fun main() {
-    Path("../README.md").writeText(generateMarkdown())
+fun main() = markout(Path("..")) {
+    file("README.md", generateMarkdown())
 }
