@@ -1,14 +1,8 @@
-repositories {
-    mavenCentral()
-}
-
 plugins {
     id("conventions")
 
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "1.1.0"
-
-    kotlin("jvm") version "1.8.0"
 
     id("com.github.gmazzo.buildconfig") version "3.1.0"
 }
