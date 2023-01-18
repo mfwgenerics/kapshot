@@ -15,7 +15,7 @@ application {
 }
 
 dependencies {
-    implementation("io.koalaql:markout:0.0.3")
+    implementation("io.koalaql:markout:0.0.5")
 
     testImplementation(kotlin("test"))
 }
