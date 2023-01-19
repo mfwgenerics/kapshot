@@ -55,28 +55,28 @@ fun Markdown.generateMarkdown() {
 
     h1("Kapshot")
 
-    +"Kapshot is a simple Kotlin compiler plugin for capturing "
-    +"source code text from closure blocks and declarations."
+    -"Kapshot is a simple Kotlin compiler plugin for capturing"
+    -"source code text from closure blocks and declarations."
 
     h2("Usage")
 
-    +"Include the `io.koalaql.kapshot-plugin` Gradle plugin in your `build.gradle.kts`:"
+    -"Include the `io.koalaql.kapshot-plugin` Gradle plugin in your `build.gradle.kts`:"
 
     code("kotlin",
         """
         plugins {
             /* ... */
     
-            id("io.koalaql.kapshot-plugin") version "0.1.0"
+            id("io.koalaql.kapshot-plugin") version "0.1.1"
         }
         """.trimIndent()
     )
 
     h3("Capturing Blocks")
 
-    +"Now your Kotlin code can use `${blockClass.simpleName}<T>` as a source enriched replacement for `() -> T`.\n"
-    +"You can use the `${CapturedBlock<*>::source.name}` property on any instance of\n"
-    +"`${blockClass.simpleName}` to access the source for that block."
+    -"Now your Kotlin code can use `${blockClass.simpleName}<T>` as a source enriched replacement for `() -> T`."
+    -"You can use the `${CapturedBlock<*>::source.name}` property on any instance of"
+    -"`${blockClass.simpleName}` to access the source for that block."
 
     code("kotlin",
         "$importStatement\n\n" +
@@ -89,7 +89,7 @@ fun Markdown.generateMarkdown() {
         }
     )
 
-    +"You can invoke the block similar to a regular function:"
+    -"You can invoke the block similar to a regular function:"
 
     code("kotlin",
         "$importStatement\n\n" +
@@ -106,17 +106,17 @@ fun Markdown.generateMarkdown() {
 
     h3("Parameterized Blocks")
 
-    +"The default `${blockClass.simpleName}` interface doesn't accept any\n"
-    +"arguments to `invoke` and is only generic on the return type. This\n"
-    +"means the captured source block must depend only on state from the\n"
-    +"enclosing scope. To write source capturing versions of builder blocks\n"
-    +"or common higher-order functions like `map` and `filter` you will\n"
-    +"need to define your own capture interface that extends `${capturableClass.simpleName}`."
+    -"The default `${blockClass.simpleName}` interface doesn't accept any"
+    -"arguments to `invoke` and is only generic on the return type. This"
+    -"means the captured source block must depend only on state from the"
+    -"enclosing scope. To write source capturing versions of builder blocks"
+    -"or common higher-order functions like `map` and `filter` you will"
+    -"need to define your own capture interface that extends `${capturableClass.simpleName}`."
 
     code("kotlin", sourceOf<CustomCapturable<*, *>>().text)
 
-    +"Once you have declared your own `${capturableClass.simpleName}` you can use it\n"
-    +"in a similar way to `${blockClass.simpleName}` from above."
+    -"Once you have declared your own `${capturableClass.simpleName}` you can use it"
+    -"in a similar way to `${blockClass.simpleName}` from above."
 
     code("kotlin", execSource {
         fun <T> List<T>.mapped(block: CustomCapturable<T, T>): String {
@@ -129,15 +129,15 @@ fun Markdown.generateMarkdown() {
         )
     })
 
-    +"If it is present, the block's argument list is considered part of its source text."
+    -"If it is present, the block's argument list is considered part of its source text."
  
     h3("Declarations")
 
-    +"You can capture declaration sources using the `@${captureAnno.simpleName}`\n"
-    +"annotation. The source of annotated declarations can then be retrieved using\n"
-    +"`sourceOf<T>` for class declarations or `sourceOf(::method)` for method\n"
-    +"declarations. The source capture starts at the end of the `@${captureAnno.simpleName}`\n"
-    +"annotation."
+    -"You can capture declaration sources using the `@${captureAnno.simpleName}`"
+    -"annotation. The source of annotated declarations can then be retrieved using"
+    -"`sourceOf<T>` for class declarations or `sourceOf(::method)` for method"
+    -"declarations. The source capture starts at the end of the `@${captureAnno.simpleName}`"
+    -"annotation."
 
     code("kotlin", execSource {
         @CaptureSource
@@ -164,11 +164,11 @@ fun Markdown.generateMarkdown() {
 
     h3("Source Location")
  
-    +"The `${Source::class.simpleName}::${Source::location.name}` property\n"
-    +"contains information about the location of captured source code\n"
-    +"including the file path (relative to the project root directory)\n"
-    +"and the char, line and column offsets for both the start\n"
-    +"and end of the captured source. Offsets are 0-indexed."
+    -"The `${Source::class.simpleName}::${Source::location.name}` property"
+    -"contains information about the location of captured source code"
+    -"including the file path (relative to the project root directory)"
+    -"and the char, line and column offsets for both the start"
+    -"and end of the captured source. Offsets are 0-indexed."
 
     val println = FakePrintln()
 
@@ -185,27 +185,27 @@ fun Markdown.generateMarkdown() {
 
     code("kotlin", source)
 
-    +"The code above will print the following:"
+    -"The code above will print the following:"
 
     code(println.toString().trim())
 
     h2("Purpose")
 
     p {
-        +"The purpose of this plugin is to support experimental literate\n"
-        +"programming and documentation generation techniques in Kotlin"
+        -"The purpose of this plugin is to support experimental literate"
+        -"programming and documentation generation techniques in Kotlin"
     }
 
     p {
-        +"An example of this is the code used to generate this README.md.\n"
-        +"Capturing source from blocks allows sample code to be run and\n"
-        +"tested during generation."
+        -"An example of this is the code used to generate this README.md."
+        -"Capturing source from blocks allows sample code to be run and"
+        -"tested during generation."
     }
 
     val thisFile = "readme/${CapturedBlock {}.source.location.path}"
 
     p {
-        +"View the source here: "
+        -"View the source here: "
         a(thisFile, thisFile)
     }
 }

@@ -1,6 +1,7 @@
 # Kapshot
 
-Kapshot is a simple Kotlin compiler plugin for capturing source code text from closure blocks and declarations.
+Kapshot is a simple Kotlin compiler plugin for capturing
+source code text from closure blocks and declarations.
 
 ## Usage
 
@@ -10,7 +11,7 @@ Include the `io.koalaql.kapshot-plugin` Gradle plugin in your `build.gradle.kts`
 plugins {
     /* ... */
 
-    id("io.koalaql.kapshot-plugin") version "0.1.0"
+    id("io.koalaql.kapshot-plugin") version "0.1.1"
 }
 ```
 
