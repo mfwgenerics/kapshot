@@ -210,6 +210,6 @@ fun Markdown.generateMarkdown() {
     }
 }
 
-fun main() = markout(Path("..")) {
+fun main() = markout {
     markdown("README") { generateMarkdown() }
 }
