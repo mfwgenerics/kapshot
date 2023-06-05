@@ -153,4 +153,31 @@ class CaptureSourceTests {
             sourceOf<CapturedSealed.Companion>().text
         )
     }
+
+    @CaptureSource
+    @Transient /* test this annotation is present in source */
+    private val someVal = 5
+
+    @CaptureSource
+    private var someVar: Int get() = 10
+        set(value) { }
+
+    @Test
+    fun `can capture source of valvars`() {
+        assertEquals(
+            """
+                @Transient /* test this annotation is present in source */
+                private val someVal = 5
+            """.trimIndent(),
+            sourceOf(::someVal).text
+        )
+
+        assertEquals(
+            """
+                private var someVar: Int get() = 10
+                    set(value) { }
+            """.trimIndent(),
+            sourceOf(::someVar).text
+        )
+    }
 }

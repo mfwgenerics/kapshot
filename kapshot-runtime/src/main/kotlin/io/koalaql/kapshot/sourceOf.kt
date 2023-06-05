@@ -1,9 +1,6 @@
 package io.koalaql.kapshot
 
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
+import kotlin.reflect.*
 
 private fun sourceOf(annotations: List<Annotation>, name: () -> String): Source {
     val anno = annotations
@@ -30,3 +27,6 @@ inline fun <reified T : Any> sourceOf() = sourceOf(typeOf<T>())
 
 fun sourceOf(method: KFunction<*>): Source =
     sourceOf(method.annotations) { method.name }
+
+fun sourceOf(property: KProperty<*>): Source =
+    sourceOf(property.annotations) { property.name }
