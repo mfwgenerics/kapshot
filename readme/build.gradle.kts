@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm")
 
     id("io.koalaql.kapshot-plugin")
     id("io.koalaql.markout") version "0.0.6"

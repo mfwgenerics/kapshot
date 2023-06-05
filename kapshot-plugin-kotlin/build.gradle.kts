@@ -1,7 +1,7 @@
 plugins {
     id("publish")
 
-    kotlin("kapt") version "1.8.0"
+    kotlin("kapt") version "1.8.21"
 }
 
 dependencies {
