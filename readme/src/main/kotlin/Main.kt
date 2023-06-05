@@ -135,7 +135,7 @@ fun Markdown.generateMarkdown() {
 
     -"You can capture declaration sources using the `@${captureAnno.simpleName}`"
     -"annotation. The source of annotated declarations can then be retrieved using"
-    -"`sourceOf<T>` for class declarations or `sourceOf(::method)` for method"
+    -"`sourceOf<T>` for class declarations or `sourceOf(::declaration)` for method and property"
     -"declarations. The source capture starts at the end of the `@${captureAnno.simpleName}`"
     -"annotation."
 
