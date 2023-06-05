@@ -43,3 +43,10 @@ jobs:
           GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
           GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
         run: ./gradlew :kapshot-plugin-gradle:publishPlugins
+      - name: Release Sonatype Repo
+        uses: nexus-actions/release-nexus-staging-repo@main
+        with:
+          username: ${{ secrets.SONATYPE_USERNAME }}
+          password: ${{ secrets.SONATYPE_PASSWORD }}
+          staging_repository_id: ${{ needs.staging_repository.outputs.repository_id }}
+          base_url: https://s01.oss.sonatype.org/service/local/
