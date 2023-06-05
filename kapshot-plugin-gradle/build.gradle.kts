@@ -15,19 +15,18 @@ dependencies {
     implementation(kotlin("gradle-plugin-api"))
 }
 
-pluginBundle {
-    website = "https://github.com/mfwgenerics/kapshot"
-    vcsUrl = "https://github.com/mfwgenerics/kapshot.git"
-    tags = listOf("kotlin", "kapshot", "jvm")
-}
-
 gradlePlugin {
+    website.set("https://github.com/mfwgenerics/kapshot")
+    vcsUrl.set("https://github.com/mfwgenerics/kapshot.git")
+
     plugins {
         create("kapshotPlugin") {
             id = "io.koalaql.kapshot-plugin"
             displayName = "Kapshot Plugin"
             description = "Kotlin Compiler Plugin for source capture in closure blocks"
             implementationClass = "io.koalaql.kapshot.GradlePlugin"
+
+            tags.set(listOf("kotlin", "kapshot", "jvm"))
         }
     }
 }
