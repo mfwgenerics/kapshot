@@ -11,7 +11,7 @@ import kotlin.io.path.Path
 @AutoService(CompilerPluginRegistrar::class)
 @OptIn(ExperimentalCompilerApi::class)
 class Registrar: CompilerPluginRegistrar() {
-    override val supportsK2: Boolean get() = false
+    override val supportsK2: Boolean get() = true
 
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         IrGenerationExtension.registerExtension(GenerationExtension(
