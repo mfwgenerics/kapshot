@@ -67,7 +67,7 @@ fun Markdown.generateMarkdown() {
         plugins {
             /* ... */
     
-            id("io.koalaql.kapshot-plugin") version "0.1.2"
+            id("io.koalaql.kapshot-plugin") version "0.2.0"
         }
         """.trimIndent()
     )
