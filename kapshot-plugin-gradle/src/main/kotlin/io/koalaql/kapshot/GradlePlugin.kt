@@ -22,7 +22,7 @@ class GradlePlugin : KotlinCompilerPluginSupportPlugin {
     override fun apply(target: Project) {
         /* make sure we don't try to add dependency until it has been configured by kotlin plugin */
         target.plugins.withId("org.jetbrains.kotlin.jvm") {
-            target.dependencies.add("implementation", "io.koalaql:kapshot-runtime:${BuildConfig.VERSION}")
+            target.dependencies.add("api", "io.koalaql:kapshot-runtime:${BuildConfig.VERSION}")
         }
     }
 
