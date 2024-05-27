@@ -1,13 +1,12 @@
 package io.koalaql.kapshot.plugin
 
-import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
 
-@AutoService(CommandLineProcessor::class)
+/* this service is registered under resources/META-INF/services */
 @OptIn(ExperimentalCompilerApi::class)
 class CliProcessor: CommandLineProcessor {
     override val pluginId: String = "io.koalaql.kapshot-plugin"

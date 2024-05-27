@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.ir.expressions.IrTypeOperator
 import org.jetbrains.kotlin.ir.expressions.IrTypeOperatorCall
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.kotlinFqName
@@ -20,6 +21,8 @@ import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path
 
+/* this service is registered under resources/META-INF/services */
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 class CaptureTransformer(
     private val context: IrPluginContext,
     private val projectDir: Path,
